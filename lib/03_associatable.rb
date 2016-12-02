@@ -10,25 +10,13 @@ class AssocOptions
   )
 
   def model_class
-    # ...
+    @name.singularize.camelcase.constantize
   end
 
   def table_name
-    # ...
+    @name.singularize.camelcase.constantize.table_name
   end
 end
-#
-# options = BelongsToOptions.new(:owner)
-# options.foreign_key # => :owner_id
-# options.primary_key # => :id
-# # this is not the class name...
-# options.class_name # => "Owner"
-#
-# # override defaults
-# options = BelongsToOptions.new(:owner, :class_name => "Human")
-# options.class_name # => "Human"
-# Use the inflector's String#camelcase,String#singularize,
-# String#underscore to aid you in your quest.
 
 class BelongsToOptions < AssocOptions
   def initialize(name, options = {})
@@ -38,6 +26,7 @@ class BelongsToOptions < AssocOptions
       class_name: name.camelcase
     }
     options = defaults.merge(options)
+    @name = name
     @foreign_key = options[:foreign_key]
     @primary_key = options[:primary_key]
     @class_name = options[:class_name]
@@ -46,14 +35,24 @@ end
 
 class HasManyOptions < AssocOptions
   def initialize(name, self_class_name, options = {})
-    # ...
+    defaults = {
+      foreign_key: (self_class_name.singularize.underscore + "_id").to_sym,
+      primary_key: :id,
+      class_name: name.singularize.camelcase
+    }
+    options = defaults.merge(options)
+    @name = name
+    @self_class_name = self_class_name
+    @foreign_key = options[:foreign_key]
+    @primary_key = options[:primary_key]
+    @class_name = options[:class_name]
   end
 end
 
 module Associatable
   # Phase IIIb
   def belongs_to(name, options = {})
-    # ...
+    belongs = BelongsToOptions.new(name, options)
   end
 
   def has_many(name, options = {})
@@ -64,6 +63,25 @@ module Associatable
     # Wait to implement this in Phase IVa. Modify `belongs_to`, too.
   end
 end
+
+# Begin writing a belongs_to method for Associatable.
+# This method should take in the association name and
+# an options hash. It should build a BelongsToOptions object;
+# save this in a local variable named options.
+#
+# Within belongs_to, call define_method to create a new
+# method to access the association. Within this method:
+#
+# Use send to get the value of the foreign key.
+# Use model_class to get the target model class.
+# Use where to select those models where the primary_key
+# column is equal to the foreign key value.
+# Call first (since there should be only one such item).
+# Throughout this method definition, use the options object
+# so that defaults are used appropriately.
+#
+# Do likewise for has_many.
+
 
 class SQLObject
   # Mixin Associatable here...
