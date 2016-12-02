@@ -17,10 +17,30 @@ class AssocOptions
     # ...
   end
 end
+#
+# options = BelongsToOptions.new(:owner)
+# options.foreign_key # => :owner_id
+# options.primary_key # => :id
+# # this is not the class name...
+# options.class_name # => "Owner"
+#
+# # override defaults
+# options = BelongsToOptions.new(:owner, :class_name => "Human")
+# options.class_name # => "Human"
+# Use the inflector's String#camelcase,String#singularize,
+# String#underscore to aid you in your quest.
 
 class BelongsToOptions < AssocOptions
   def initialize(name, options = {})
-    # ...
+    defaults = {
+      foreign_key: (name.underscore + "_id").to_sym,
+      primary_key: :id,
+      class_name: name.camelcase
+    }
+    options = defaults.merge(options)
+    @foreign_key = options[:foreign_key]
+    @primary_key = options[:primary_key]
+    @class_name = options[:class_name]
   end
 end
 
