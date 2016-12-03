@@ -52,7 +52,7 @@ module Associatable
     self.assoc_options[name] = BelongsToOptions.new(name, options)
 
     define_method(name) do
-      options = self.assoc_options[name]
+      options = self.class.assoc_options[name]
       foreign_key = send(options.foreign_key)
       options
         .model_class
@@ -66,7 +66,7 @@ module Associatable
     self.assoc_options[name] = HasManyOptions.new(name, self.name, options)
 
     define_method(name) do
-      options = self.assoc_options[name]
+      options = self.class.assoc_options[name]
       foreign_key = send("#{options.primary_key}")
       options
         .model_class
